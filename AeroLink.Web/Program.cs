@@ -10,6 +10,14 @@ builder.Services.AddDbContext<AeroLinkDbContext>(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AeroLinkDbContext>();
+    var seedPath = Path.Combine(app.Environment.ContentRootPath, "Data", "SeedData",
+        "IAB251_Synthetic_Baggage_Manifest.xlsx");
+    DbSeeder.Seed(db, seedPath);
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

@@ -25,6 +25,10 @@ public class AeroLinkDbContext : DbContext
     /// <param name="modelBuilder">The builder used to configure the model.</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // BagException's key is "ExceptionId", which doesn't match EF's naming convention
+        // for the class name, so it must be declared explicitly.
+        modelBuilder.Entity<BagException>().HasKey(e => e.ExceptionId);
+
         // Store enums as readable text ("Pending") instead of numbers.
         modelBuilder.Entity<Flight>().Property(f => f.LoadingStatus).HasConversion<string>();
         modelBuilder.Entity<Bag>().Property(b => b.Outcome).HasConversion<string>();
