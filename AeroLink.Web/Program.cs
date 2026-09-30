@@ -1,9 +1,22 @@
+using AeroLink.Web.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddDbContext<AeroLinkDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("AeroLink")));
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AeroLinkDbContext>();
+    var seedPath = Path.Combine(app.Environment.ContentRootPath, "Data", "SeedData",
+        "IAB251_Synthetic_Baggage_Manifest.xlsx");
+    DbSeeder.Seed(db, seedPath);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

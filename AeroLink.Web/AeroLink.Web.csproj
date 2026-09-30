@@ -10,5 +10,9 @@
     <PackageReference Include="ClosedXML" Version="0.105.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
   </ItemGroup>
-
+  <ItemGroup>
+  <None Include="Data\SeedData\IAB251_Synthetic_Baggage_Manifest.xlsx">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+  </ItemGroup>
 </Project>
