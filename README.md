@@ -1,52 +1,86 @@
-# AeroLink: Departure Baggage Loading Verification and Exception Management
+# AeroLink: Departure Baggage Loading Verification
 
-IAB251 Assessment 2 prototype. A Razor Pages web app that lets Baggage Handlers verify bags against a flight manifest and lets Baggage Supervisors resolve exceptions and close loading.
+IAB251 Assessment 2 prototype. A Razor Pages web app that lets Baggage Handlers verify bags against a flight manifest, follow special-handling instructions, report problems, and view loading status.
 
 ## Team
 
 | Member | Stories |
 |---|---|
-| Aditi Vansjaliya | T1, T3, I1, I2|
-| Hetvik Desai | T2, T4, I3, I4|
+| Aditi Vansjaliya | T1, T3, I1, I3 |
+| Hetvik Desai | T2, T4, I2, I4 |
+
+Stories I5 and I6 were removed from this assessment (confirmed with the tutor), so the workflow ends after reporting an exception and viewing the status report.
+
+## Workflow
+
+```
+Sign in → Main screen → Select flight → View manifest → Verify and load a bag
+        → Acknowledge special handling → Report an exception → View status report → Log out
+```
+
+## Current status
+
+| Story | What it does | Owner | Status |
+|---|---|---|---|
+| T1 | Main screen, navigation, sign-in state | Aditi | ✅ |
+| I1 | View expected bags for a flight | Aditi | ✅ |
+| T3 | Log out | Aditi | 🔄 |
+| I3 | Special-handling acknowledgement | Aditi | 🔲 |
+| I2 | Verify and confirm a bag | Hetvik | 🔲 |
+| T2 | Sign in using the HR API | Hetvik | 🔲 |
+| I4 | Report a bag problem | Hetvik | 🔲 |
+| T4 | Loading status report | Hetvik | 🔲 |
+
+Until T2 is finished, sign-in is a **temporary** page that accepts any name, and the HR API is not needed.
 
 ## Tech stack
 
 - ASP.NET Core Razor Pages (.NET 8)
 - Entity Framework Core with SQLite
+- ClosedXML to read the supplied manifest spreadsheet
 - xUnit for unit tests
 - External HR system consumed through its REST API
 - Azure DevOps Boards for planning, GitHub for version control
 
 ## Prerequisites
 
-- .NET 8 SDK (`dotnet --list-sdks` should list an 8.x version)
-- The supplied HR System API project (`HRSystem`)
+- .NET 8 SDK (`dotnet --list-sdks` should list an 8.x version). `global.json` pins it.
+- The supplied HR System API project (`HRSystem`), needed once T2 is merged.
 
 ## How to run
 
-1. Start the HR API first:
-```bash
-   cd HRSystem
-   dotnet run
-```
-   It listens on `https://localhost:5001`.
+From the repository root:
 
-2. In a second terminal, start AeroLink:
 ```bash
-   cd AeroLink.Web
-   dotnet run
+dotnet build
+dotnet run --project AeroLink.Web
 ```
-The console prints the URL to open. The database (`AeroLink.db`) is created and seeded from the manifest on first run.
+
+The console prints the `https://localhost:xxxx` address to open. The database (`AeroLink.db`) is created and seeded from the manifest on the first run.
 
 If you change the data model, delete `AeroLink.db` and restart so it is rebuilt.
 
+**Once the real login (T2) is merged**, start the HR API first in a separate terminal:
+
+```bash
+dotnet run --project HRSystem
+```
+
+It listens on `https://localhost:5001`. Then start AeroLink as above.
+
+**Tip:** the login is a browser cookie that lasts for the browser session. To see the sign-in page again, use the Log out button or a private window.
+
 ## Demo accounts (from the HR system)
+
+Used once T2 is merged.
 
 | Employee ID | Email | Role |
 |---|---|---|
 | 100101 | s.mitchell@company.com | Baggage Handler |
 | 300100 | p.sharma@company.com | Baggage Handler |
 | 200100 | j.cooper@company.com | Baggage Supervisor |
+
+The Baggage Supervisor account can sign in, but this prototype has no supervisor-only features.
 
 ## Running the tests
 
@@ -63,7 +97,8 @@ AeroLink.Tests/   xUnit unit tests
 
 ## Team workflow
 
-- `main` is always in a working state. Nobody pushes to it directly.
-- Each user story or task gets its own branch, e.g. `feature/I1-data-model`.
-- Changes reach `main` through a pull request reviewed by the other team member.
-- Commit messages and PRs reference the Azure Boards work item ID.
+- `main` should always build and run.
+- Each user story or task gets its own branch, for example `feature/I3-special-handling`.
+- Changes reach `main` through a pull request. The other team member reviews where possible.
+- Commit messages and pull requests reference the story, for example `Add logout handler (T3)`.
+- The Azure DevOps task moves to Active when work starts and Closed when the pull request is merged.
