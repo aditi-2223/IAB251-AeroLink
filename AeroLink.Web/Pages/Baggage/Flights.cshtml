@@ -1,0 +1,33 @@
+@page
+@model AeroLink.Web.Pages.Baggage.FlightsModel
+@{ ViewData["Title"] = "Select a flight"; }
+
+<h2>Select a departure flight</h2>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Flight</th>
+            <th>Route</th>
+            <th>Departs (UTC)</th>
+            <th>Loading status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var f in Model.Flights)
+    {
+        <tr>
+            <td>@f.FlightNumber</td>
+            <td>@f.DepartureAirport &rarr; @f.ArrivalAirport</td>
+            <td>@f.ScheduledDepartureUtc.ToString("dd MMM yyyy HH:mm")</td>
+            <td><span class="badge bg-secondary">@f.LoadingStatus</span></td>
+            <td>
+                <a class="btn btn-sm btn-primary" asp-page="Manifest" asp-route-flightId="@f.FlightId">
+                    View manifest
+                </a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

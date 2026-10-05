@@ -1,0 +1,41 @@
+@page
+@model AeroLink.Web.Pages.Baggage.ManifestModel
+@{ ViewData["Title"] = "Manifest"; }
+
+<h2>
+    @Model.Flight!.FlightNumber &mdash; @Model.Flight.DepartureAirport to @Model.Flight.ArrivalAirport
+    <small class="text-muted">@Model.Flight.ScheduledDepartureUtc.ToString("dd MMM yyyy")</small>
+</h2>
+
+<p>
+    Expected: <strong>@Model.Flight.Bags.Count</strong> |
+    Loaded: <strong>@Model.Flight.Bags.Count(b => b.Outcome == BagOutcome.Loaded)</strong> |
+    Outstanding: <strong>@Model.Flight.Bags.Count(b => b.Outcome == BagOutcome.Pending)</strong>
+</p>
+
+<table class="table">
+    <thead>
+        <tr><th>Bag tag</th><th>Type</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+    @foreach (var b in Model.Flight.Bags)
+    {
+        <tr>
+            <td>@b.Tag</td>
+            <td>
+                @if (b.IsSpecial)
+                {
+                    <span class="badge bg-warning text-dark">@b.HandlingType</span>
+                }
+                else
+                {
+                    @b.HandlingType
+                }
+            </td>
+            <td>@(b.Outcome == BagOutcome.Pending ? "Outstanding" : b.Outcome.ToString())</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<a class="btn btn-outline-secondary" asp-page="Flights">&larr; Back to flights</a>
