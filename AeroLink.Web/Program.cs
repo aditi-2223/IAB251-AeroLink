@@ -1,11 +1,30 @@
 using AeroLink.Web.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using AeroLink.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(options =>
+{
+    // T1: everything under /Baggage and the main screen require sign-in.
+    options.Conventions.AuthorizeFolder("/Baggage");
+    options.Conventions.AuthorizePage("/Index");
+    options.Conventions.AllowAnonymousToPage("/Account/Login");
+});
+
+// T1: cookie authentication. Implements the real HR login (T2)
+// only needs to call HttpContext.SignInAsync with this default scheme.
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/Login";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+    });
+
 builder.Services.AddDbContext<AeroLinkDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("AeroLink")));
 
@@ -34,6 +53,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication(); // T1: must come BEFORE UseAuthorization
 app.UseAuthorization();
 
 app.MapRazorPages();
