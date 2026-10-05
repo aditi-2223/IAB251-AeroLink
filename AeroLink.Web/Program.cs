@@ -1,5 +1,6 @@
 using AeroLink.Web.Data;
 using Microsoft.EntityFrameworkCore;
+using AeroLink.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<AeroLinkDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("AeroLink")));
+
+builder.Services.AddScoped<IFlightService, FlightService>();
 
 var app = builder.Build();
 
