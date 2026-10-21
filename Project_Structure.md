@@ -2,7 +2,7 @@
 
 This document explains what each folder and file is for, who owns it, and which user story it supports.
 
-**Owners:** Aditi = Member A (T1, T3, I1, I3). Hetvik = Member B (T2, T4, I2, I4).
+**Owners:** Aditi = Member A (T1, T3, I1, I3). Hetvik = Member B (T2, I2, I4).
 
 **Status:** ✅ done, 🔄 in progress, 🔲 still to do
 
@@ -54,7 +54,7 @@ AeroLink.Web/
 │   ├── BagVerificationService.cs   🔲 Check a bag tag and confirm loading    (B, I2)
 │   ├── HrAuthService.cs            🔲 Check an employee with the HR API      (B, T2)
 │   ├── ExceptionService.cs         🔲 Report a bag exception                 (B, I4)
-│   └── LoadingStatusService.cs     🔲 Expected, loaded and outstanding counts (B, T4)
+│   
 │
 └── Pages/                          Razor Pages (thin, they just call services)
     ├── Index.cshtml                ✅ Main screen with module tiles          (A, T1)
@@ -66,8 +66,7 @@ AeroLink.Web/
     └── Baggage/                    Everything in this folder needs sign-in
         ├── Flights.cshtml(.cs)     ✅ Choose a flight                        (A, I1)
         ├── Manifest.cshtml(.cs)    ✅ Expected bags (I3 adds category and instruction) (A, I1 + I3)
-        ├── Loading.cshtml(.cs)     🔲 Enter tag and confirm (B, I2). Special-handling panel (A, I3). Report a problem (B, I4)
-        └── Status.cshtml(.cs)      🔲 Loading status report                  (B, T4)
+        ├── Loading.cshtml(.cs)     🔲 Enter tag and confirm (B, I2). Special-handling panel (A, I3). 
 ```
 
 The template also created `Pages/Privacy.cshtml`, `Pages/Error.cshtml` and `wwwroot/`. Leave `wwwroot/` alone. `Privacy` is no longer linked from the navbar and can be deleted.
@@ -83,7 +82,6 @@ AeroLink.Tests/
 ├── BagVerificationServiceTests.cs   🔲 Valid, invalid, duplicate, wrong flight    (B, I2) individual test story
 ├── ExceptionServiceTests.cs         🔲 Reporting an exception                     (B, I4)
 ├── HrAuthServiceTests.cs            🔲 HR API success and failure cases           (B, T2)
-└── LoadingStatusServiceTests.cs     🔲 Status counts                              (B, T4)
 ```
 
 One test file per service, named `<Service>Tests.cs`. Tests cover typical cases and boundary cases, and use mocks or an in-memory database where a service depends on something else.

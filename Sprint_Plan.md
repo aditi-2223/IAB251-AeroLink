@@ -88,8 +88,6 @@ Order matters: **do I2 first**, because I3, I4 and T4 all build on the `Loading`
 | Story | Tasks | Status |
 |---|---|---|
 | **I4** Report a problem | `ExceptionService`, report form on the `Loading` page, `ExceptionServiceTests` | 🔲 |
-| **T4** Status report | `LoadingStatusService`, `Status` page, `LoadingStatusServiceTests` | 🔲 |
-| Any unfinished Sprint 1 stories | | |
 
 ### Order of work and dependencies
 
@@ -97,7 +95,6 @@ Order matters: **do I2 first**, because I3, I4 and T4 all build on the `Loading`
 T1 ✅ → T2 (B replaces the temporary sign-in)
 I1 ✅ → I2 (B) → I3 part 2 (A, adds the panel to the Loading page)
               → I4 (B, report form on the Loading page)
-              → T4 (B, counts depend on bags being marked loaded)
 I3 part 1 (A) is independent: service, tests and manifest display
 T3 🔄 is independent
 ```

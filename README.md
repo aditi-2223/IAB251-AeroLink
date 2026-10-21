@@ -7,7 +7,7 @@ IAB251 Assessment 2 prototype. A Razor Pages web app that lets Baggage Handlers 
 | Member | Stories |
 |---|---|
 | Aditi Vansjaliya | T1, T3, I1, I3 |
-| Hetvik Desai | T2, T4, I2, I4 |
+| Hetvik Desai | T2, I2, I4 |
 
 Stories I5 and I6 were removed from this assessment (confirmed with the tutor), so the workflow ends after reporting an exception and viewing the status report.
 
