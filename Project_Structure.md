@@ -6,13 +6,13 @@ This document explains what each folder and file is for, who owns it, and which 
 
 **Status:** ✅ done, 🔄 in progress, 🔲 still to do
 
-**Scope note:** Stories I5 (supervisor decision) and I6 (close loading) are out of scope for Assessment 2 (confirmed with the tutor). The workflow ends after reporting an exception (I4) and viewing the status report (T4).
+**Scope note:** The team is two people, so the scope is T1, T2, T3, I1, I2, I3 and I4 (confirmed with the tutor). Stories I5, I6 and T4 are not part of this assessment. The workflow ends after reporting an exception (I4).
 
 ## The workflow
 
 ```
 Sign in → Main screen → Select flight → View manifest → Verify and load a bag
-        → Acknowledge special handling → Report an exception → View status report → Log out
+        → Acknowledge special handling → Report an exception → Log out
 ```
 
 ## Repository layout
@@ -53,8 +53,7 @@ AeroLink.Web/
 │   ├── SpecialHandlingService.cs   🔲 Is a bag special, its instruction, acknowledgement rule (A, I3)
 │   ├── BagVerificationService.cs   🔲 Check a bag tag and confirm loading    (B, I2)
 │   ├── HrAuthService.cs            🔲 Check an employee with the HR API      (B, T2)
-│   ├── ExceptionService.cs         🔲 Report a bag exception                 (B, I4)
-│   
+│   └── ExceptionService.cs         🔲 Report a bag exception                 (B, I4)
 │
 └── Pages/                          Razor Pages (thin, they just call services)
     ├── Index.cshtml                ✅ Main screen with module tiles          (A, T1)
@@ -66,7 +65,7 @@ AeroLink.Web/
     └── Baggage/                    Everything in this folder needs sign-in
         ├── Flights.cshtml(.cs)     ✅ Choose a flight                        (A, I1)
         ├── Manifest.cshtml(.cs)    ✅ Expected bags (I3 adds category and instruction) (A, I1 + I3)
-        ├── Loading.cshtml(.cs)     🔲 Enter tag and confirm (B, I2). Special-handling panel (A, I3). 
+        └── Loading.cshtml(.cs)     🔲 Enter tag and confirm (B, I2), special-handling panel (A, I3), report a problem (B, I4)
 ```
 
 The template also created `Pages/Privacy.cshtml`, `Pages/Error.cshtml` and `wwwroot/`. Leave `wwwroot/` alone. `Privacy` is no longer linked from the navbar and can be deleted.
@@ -81,7 +80,7 @@ AeroLink.Tests/
 ├── SpecialHandlingServiceTests.cs   🔲 Standard vs special bags, acknowledgement  (A, I3) individual test story
 ├── BagVerificationServiceTests.cs   🔲 Valid, invalid, duplicate, wrong flight    (B, I2) individual test story
 ├── ExceptionServiceTests.cs         🔲 Reporting an exception                     (B, I4)
-├── HrAuthServiceTests.cs            🔲 HR API success and failure cases           (B, T2)
+└── HrAuthServiceTests.cs            🔲 HR API success and failure cases           (B, T2)
 ```
 
 One test file per service, named `<Service>Tests.cs`. Tests cover typical cases and boundary cases, and use mocks or an in-memory database where a service depends on something else.
@@ -94,7 +93,7 @@ One test file per service, named `<Service>Tests.cs`. Tests cover typical cases 
 | Bags | BagId, FlightId, Tag (unique), HandlingType, HandlingInstruction, Outcome | Any handling type other than Standard is "special" |
 | Exceptions | ExceptionId, BagId, FlightId, Category, Description, Status, ReportedAtUtc | |
 
-Some enum values and columns exist from the original design but are **not used** in this prototype because I5 and I6 were removed: the `Completed` flight status, the `ApprovedNotToLoad` bag outcome, the `Resolved` exception status and `DecisionReason`.
+Some enum values and columns exist from the original design but are **not used** in this prototype because those stories were removed: the `Completed` flight status, the `ApprovedNotToLoad` bag outcome, the `Resolved` exception status and `DecisionReason`.
 
 Employees are not stored locally. They are checked against the HR API.
 
@@ -110,7 +109,6 @@ All pages need sign-in except `/Account/Login`. The selected flight is passed in
 | `/Baggage/Flights` | Choose a flight |
 | `/Baggage/Manifest?flightId=101` | View the manifest |
 | `/Baggage/Loading?flightId=101` | Verify and load bags, report a problem |
-| `/Baggage/Status?flightId=101` | Loading status report |
 
 ## How a request flows
 

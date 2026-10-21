@@ -1,6 +1,6 @@
 # AeroLink: Departure Baggage Loading Verification
 
-IAB251 Assessment 2 prototype. A Razor Pages web app that lets Baggage Handlers verify bags against a flight manifest, follow special-handling instructions, report problems, and view loading status.
+IAB251 Assessment 2 prototype. A Razor Pages web app that lets Baggage Handlers verify bags against a flight manifest, follow special-handling instructions, and report problems.
 
 ## Team
 
@@ -9,13 +9,13 @@ IAB251 Assessment 2 prototype. A Razor Pages web app that lets Baggage Handlers 
 | Aditi Vansjaliya | T1, T3, I1, I3 |
 | Hetvik Desai | T2, I2, I4 |
 
-Stories I5 and I6 were removed from this assessment (confirmed with the tutor), so the workflow ends after reporting an exception and viewing the status report.
+The team is two people, so the scope is T1, T2, T3, I1, I2, I3 and I4 (confirmed with the tutor). Stories I5, I6 and T4 are not part of this assessment, so the workflow ends after reporting an exception.
 
 ## Workflow
 
 ```
 Sign in → Main screen → Select flight → View manifest → Verify and load a bag
-        → Acknowledge special handling → Report an exception → View status report → Log out
+        → Acknowledge special handling → Report an exception → Log out
 ```
 
 ## Current status
@@ -26,10 +26,9 @@ Sign in → Main screen → Select flight → View manifest → Verify and load 
 | I1 | View expected bags for a flight | Aditi | ✅ |
 | T3 | Log out | Aditi | 🔄 |
 | I3 | Special-handling acknowledgement | Aditi | 🔲 |
-| I2 | Verify and confirm a bag | Hetvik | 🔲 |
 | T2 | Sign in using the HR API | Hetvik | 🔲 |
+| I2 | Verify and confirm a bag | Hetvik | 🔲 |
 | I4 | Report a bag problem | Hetvik | 🔲 |
-| T4 | Loading status report | Hetvik | 🔲 |
 
 Until T2 is finished, sign-in is a **temporary** page that accepts any name, and the HR API is not needed.
 
@@ -94,6 +93,8 @@ dotnet test
 AeroLink.Web/     Razor Pages app (Models, Data, Services, Pages)
 AeroLink.Tests/   xUnit unit tests
 ```
+
+[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for every file and its owner, and [sprint_plan.md](sprint_plan.md) for the sprint plan and MVP.
 
 ## Team workflow
 
