@@ -4,7 +4,7 @@ IAB251 Assessment 2. Team of 2: **Aditi Vansjaliya (Member A)** and **Hetvik Des
 
 **Status key:** ✅ done and merged, 🔄 in progress, 🔲 not started
 
-**Scope:** Stories I5 (supervisor decision) and I6 (close loading) are removed from Assessment 2 (confirmed with the tutor). The workflow ends after reporting an exception (I4) and viewing the status report (T4).
+**Scope:** The team is two people, so the scope is T1, T2, T3, I1, I2, I3 and I4 (confirmed with the tutor). Stories I5, I6 and T4 are not part of this assessment. The workflow ends after reporting an exception (I4).
 
 ---
 
@@ -16,7 +16,7 @@ Make the whole workflow clickable from start to finish first, then polish each p
 
 ```
 Sign in → Main screen → Select flight → View manifest → Verify and load a bag
-        → Acknowledge special handling → Report an exception → View status report → Log out
+        → Acknowledge special handling → Report an exception → Log out
 ```
 
 **MVP is done when:**
@@ -29,13 +29,12 @@ Sign in → Main screen → Select flight → View manifest → Verify and load 
 | 4 | A valid tag can be confirmed as loaded; invalid, wrong-flight and duplicate tags are rejected | I2 | Hetvik |
 | 5 | A special bag shows its instruction and cannot be loaded until acknowledged | I3 | Aditi |
 | 6 | A handler can report a problem with a bag and it is stored as an open exception | I4 | Hetvik |
-| 7 | The status report shows expected, loaded and outstanding counts and open exceptions | T4 | Hetvik |
-| 8 | The user can log out and protected pages are no longer reachable | T3 | Aditi |
-| 9 | Each person has a unit test suite for their stories | I1, I3 / I2, I4 | Both |
+| 7 | The user can log out and protected pages are no longer reachable | T3 | Aditi |
+| 8 | Each person has a unit test suite for their stories | I1, I3 / I2, I4 | Both |
 
 ---
 
-## 2. Sprint 1 : foundation and first screens
+## 2. Sprint 1: foundation and first screens
 
 **Sprint dates:** 05-10-26 to 11-10-26
 
@@ -52,7 +51,7 @@ Supporting work finished this sprint: `README.md`, `PROJECT_STRUCTURE.md`, `.git
 
 ### Hetvik (Member B)
 
-Order matters: **do I2 first**, because I3, I4 and T4 all build on the `Loading` page and `BagVerificationService`. The temporary sign-in keeps the app usable until T2 lands.
+Order matters: **do I2 first**, because I3 and I4 both build on the `Loading` page and `BagVerificationService`. The temporary sign-in keeps the app usable until T2 lands.
 
 | Story | Tasks | Status |
 |---|---|---|
@@ -68,7 +67,7 @@ Order matters: **do I2 first**, because I3, I4 and T4 all build on the `Loading`
 
 ---
 
-## 3. Sprint 2 (next): exceptions, status and special-handling screen
+## 3. Sprint 2: special handling and exceptions
 
 **Sprint dates:** ____ to ____
 
@@ -88,6 +87,7 @@ Order matters: **do I2 first**, because I3, I4 and T4 all build on the `Loading`
 | Story | Tasks | Status |
 |---|---|---|
 | **I4** Report a problem | `ExceptionService`, report form on the `Loading` page, `ExceptionServiceTests` | 🔲 |
+| Any unfinished Sprint 1 stories | | |
 
 ### Order of work and dependencies
 
@@ -98,6 +98,8 @@ I1 ✅ → I2 (B) → I3 part 2 (A, adds the panel to the Loading page)
 I3 part 1 (A) is independent: service, tests and manifest display
 T3 🔄 is independent
 ```
+
+---
 
 ## 4. Team working agreement
 
