@@ -56,7 +56,7 @@ Order matters: **do I2 first**, because I3 and I4 both build on the `Loading` pa
 | Story | Tasks | Status |
 |---|---|---|
 | **I2** Verify and confirm a bag | `IBagVerificationService` + `BagVerificationService`, `Loading` page (tag entry and confirm), rejection rules (invalid, wrong flight, duplicate), `BagVerificationServiceTests` | 🔲 |
-| **T2** HR login | Replace the temporary `Account/Login`, call the HR API in `HrAuthService`, show errors for empty or invalid input, `HrAuthServiceTests` | 🔲 |
+
 
 ### Decisions and notes (also logged on the board)
 
@@ -77,7 +77,7 @@ Order matters: **do I2 first**, because I3 and I4 both build on the `Loading` pa
 
 | Story | Tasks | Status |
 |---|---|---|
-| **T3** Log out | `Logout` page (POST), navbar Log out button | 🔄 |
+| **T3** Log out | `Logout` page (POST), navbar Log out button | ✅ |
 | **I3** Special handling (part 1) | `ISpecialHandlingService` + `SpecialHandlingService`, show category and instruction on the `Manifest` page, `SpecialHandlingServiceTests` | 🔲 |
 | **I3** Special handling (part 2) | After I2 is merged: show the instruction panel and an acknowledgement checkbox on the `Loading` page, keep Confirm disabled until it is ticked | 🔲 |
 | **I1 tests** | `FlightServiceTests`: list flights, manifest for a flight, unknown flight | 🔲 |
@@ -86,6 +86,7 @@ Order matters: **do I2 first**, because I3 and I4 both build on the `Loading` pa
 
 | Story | Tasks | Status |
 |---|---|---|
+| **T2** HR login | Replace the temporary `Account/Login`, call the HR API in `HrAuthService`, show errors for empty or invalid input, `HrAuthServiceTests` | 🔲 |
 | **I4** Report a problem | `ExceptionService`, report form on the `Loading` page, `ExceptionServiceTests` | 🔲 |
 | Any unfinished Sprint 1 stories | | |
 
@@ -129,5 +130,5 @@ Add a line at the end of each sprint.
 
 | Sprint | What went well | What was hard | What we change |
 |---|---|---|---|
-| 1 | | | |
+| 1 | User stories were completed on time for one team member| Maintaining sprint plan consistency, as one team member was behind and other was ahead | work distribution was changed as one person had comparatively a bit more user story than other person |
 | 2 | | | |

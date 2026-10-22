@@ -61,7 +61,7 @@ AeroLink.Web/
     │   └── _Layout.cshtml          ✅ Navbar with sign-in state and log out  (A, T1 + T3)
     ├── Account/
     │   ├── Login.cshtml(.cs)       ✅ TEMPORARY sign-in, B replaces with HR login (A temporary, B T2)
-    │   └── Logout.cshtml(.cs)      🔄 Signs out and goes to login            (A, T3)
+    │   └── Logout.cshtml(.cs)      ✅ Signs out and goes to login            (A, T3)
     └── Baggage/                    Everything in this folder needs sign-in
         ├── Flights.cshtml(.cs)     ✅ Choose a flight                        (A, I1)
         ├── Manifest.cshtml(.cs)    ✅ Expected bags (I3 adds category and instruction) (A, I1 + I3)
