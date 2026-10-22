@@ -27,7 +27,7 @@ Sign in → Main screen → Select flight → View manifest → Verify and load 
 | T3 | Log out | Aditi | 🔄 |
 | I3 | Special-handling acknowledgement | Aditi | 🔲 |
 | T2 | Sign in using the HR API | Hetvik | 🔲 |
-| I2 | Verify and confirm a bag | Hetvik | 🔲 |
+| I2 | Verify and confirm a bag | Hetvik | 🔄 |
 | I4 | Report a bag problem | Hetvik | 🔲 |
 
 Until T2 is finished, sign-in is a **temporary** page that accepts any name, and the HR API is not needed.

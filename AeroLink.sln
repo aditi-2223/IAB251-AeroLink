@@ -1,19 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.10.12224.181 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AeroLink.Web", "AeroLink.Web\AeroLink.Web.csproj", "{FDA142F4-7F76-4B51-A0DB-E668DB6E669B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AeroLink.Tests", "AeroLink.Tests\AeroLink.Tests.csproj", "{3ED7722B-EB19-4C03-A4D1-70F2E651CD0A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{30E9F465-78CC-4AA2-B74C-4494D134DDC7}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		global.json = global.json
+		Project_Structure.md = Project_Structure.md
+		README.md = README.md
+		Sprint_Plan.md = Sprint_Plan.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{FDA142F4-7F76-4B51-A0DB-E668DB6E669B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -24,5 +30,11 @@ Global
 		{3ED7722B-EB19-4C03-A4D1-70F2E651CD0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3ED7722B-EB19-4C03-A4D1-70F2E651CD0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3ED7722B-EB19-4C03-A4D1-70F2E651CD0A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8D39E93C-8C4A-43F7-BDF9-12A70B51A524}
 	EndGlobalSection
 EndGlobal

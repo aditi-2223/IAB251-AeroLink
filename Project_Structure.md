@@ -51,7 +51,7 @@ AeroLink.Web/
 ├── Services/                       Business rules (this is what the tests target)
 │   ├── FlightService.cs            ✅ List flights, get a manifest           (A, I1)
 │   ├── SpecialHandlingService.cs   🔲 Is a bag special, its instruction, acknowledgement rule (A, I3)
-│   ├── BagVerificationService.cs   🔲 Check a bag tag and confirm loading    (B, I2)
+│   ├── BagVerificationService.cs   🔄 Check a bag tag and confirm loading    (B, I2)
 │   ├── HrAuthService.cs            🔲 Check an employee with the HR API      (B, T2)
 │   └── ExceptionService.cs         🔲 Report a bag exception                 (B, I4)
 │
@@ -65,12 +65,12 @@ AeroLink.Web/
     └── Baggage/                    Everything in this folder needs sign-in
         ├── Flights.cshtml(.cs)     ✅ Choose a flight                        (A, I1)
         ├── Manifest.cshtml(.cs)    ✅ Expected bags (I3 adds category and instruction) (A, I1 + I3)
-        └── Loading.cshtml(.cs)     🔲 Enter tag and confirm (B, I2), special-handling panel (A, I3), report a problem (B, I4)
+        └── Loading.cshtml(.cs)     🔄 Enter tag and confirm (B, I2), special-handling panel (A, I3), report a problem (B, I4)
 ```
 
 The template also created `Pages/Privacy.cshtml`, `Pages/Error.cshtml` and `wwwroot/`. Leave `wwwroot/` alone. `Privacy` is no longer linked from the navbar and can be deleted.
 
-`SpecialHandlingService` is a separate class so I3 (A) and I2 (B) do not edit the same file. B's `BagVerificationService` calls it before confirming a special bag.
+`SpecialHandlingService` is a separate class so I3 (A) and I2 (B) do not edit the same file. I2 accepts an `acknowledged` boolean when confirming a special bag; I3 supplies the acknowledgement panel on the Loading page.
 
 ## AeroLink.Tests (unit tests)
 
@@ -78,7 +78,7 @@ The template also created `Pages/Privacy.cshtml`, `Pages/Error.cshtml` and `wwwr
 AeroLink.Tests/
 ├── FlightServiceTests.cs            🔲 Flight and manifest lookups                (A, I1)
 ├── SpecialHandlingServiceTests.cs   🔲 Standard vs special bags, acknowledgement  (A, I3) individual test story
-├── BagVerificationServiceTests.cs   🔲 Valid, invalid, duplicate, wrong flight    (B, I2) individual test story
+├── BagVerificationServiceTests.cs   🔄 Valid, invalid, duplicate, wrong flight    (B, I2) individual test story
 ├── ExceptionServiceTests.cs         🔲 Reporting an exception                     (B, I4)
 └── HrAuthServiceTests.cs            🔲 HR API success and failure cases           (B, T2)
 ```
