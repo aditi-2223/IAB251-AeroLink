@@ -29,6 +29,7 @@ builder.Services.AddDbContext<AeroLinkDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("AeroLink")));
 
 builder.Services.AddScoped<IFlightService, FlightService>();
+builder.Services.AddScoped<IBagVerificationService, BagVerificationService>();
 
 var app = builder.Build();
 

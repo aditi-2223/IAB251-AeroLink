@@ -55,7 +55,7 @@ Order matters: **do I2 first**, because I3 and I4 both build on the `Loading` pa
 
 | Story | Tasks | Status |
 |---|---|---|
-| **I2** Verify and confirm a bag | `IBagVerificationService` + `BagVerificationService`, `Loading` page (tag entry and confirm), rejection rules (invalid, wrong flight, duplicate), `BagVerificationServiceTests` | 🔲 |
+| **I2** Verify and confirm a bag | `IBagVerificationService` + `BagVerificationService`, `Loading` page (tag entry and confirm), rejection rules (invalid, wrong flight, duplicate), `BagVerificationServiceTests` | 🔄 |
 | **T2** HR login | Replace the temporary `Account/Login`, call the HR API in `HrAuthService`, show errors for empty or invalid input, `HrAuthServiceTests` | 🔲 |
 
 ### Decisions and notes (also logged on the board)
