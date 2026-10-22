@@ -45,7 +45,7 @@ public class LoginModel : PageModel
         var claims = new List<Claim>
         {
             new(ClaimTypes.Name, Username.Trim()),
-            new(ClaimTypes.Role, "BaggageHandler")
+            new(ClaimTypes.Role, "Baggage Handler")
         };
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 

@@ -65,7 +65,7 @@ If you change the data model, delete `AeroLink.db` and restart so it is rebuilt.
 dotnet run --project HRSystem
 ```
 
-It listens on `https://localhost:5001`. Then start AeroLink as above.
+It listens on `https://localhost:5183`. Then start AeroLink as above.
 
 **Tip:** the login is a browser cookie that lasts for the browser session. To see the sign-in page again, use the Log out button or a private window.
 
