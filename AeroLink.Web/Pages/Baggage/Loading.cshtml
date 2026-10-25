@@ -20,16 +20,33 @@
     </div>
     <button class="btn btn-primary" asp-page-handler="Verify">Verify</button>
 
-    @if (Model.Result?.Success == true && Model.Result.Bag is not null)
+    @if (Model.BagAwaitingConfirmation is { } bag)
     {
+        var handling = Model.GetHandlingInfo(bag);
         <div class="card mt-3">
             <div class="card-body">
-                <p class="mb-1"><strong>@Model.Result.Bag.Tag</strong></p>
-                <p class="mb-2">Handling type: @Model.Result.Bag.HandlingType</p>
+                <p class="mb-1"><strong>@bag.Tag</strong></p>
 
-                @* I3 placeholder: add special-handling acknowledgement panel here. Bind its checkbox to Acknowledged. *@
+                <partial name="_SpecialHandlingPanel" model="handling" />
+                @if (!handling.IsSpecial)
+                {
+                    <p class="mb-2">Handling type: @handling.Category</p>
+                }
 
-                <button class="btn btn-success" asp-page-handler="Confirm">Confirm loaded</button>
+                @if (handling.RequiresAcknowledgement)
+                {
+                    <div class="form-check my-3">
+                        <input asp-for="Acknowledged" class="form-check-input" />
+                        <label asp-for="Acknowledged" class="form-check-label">
+                            I have read this instruction and will follow it.
+                        </label>
+                    </div>
+                }
+
+                <button id="confirm-button" class="btn btn-success mt-2" asp-page-handler="Confirm"
+                        disabled="@(handling.RequiresAcknowledgement && !Model.Acknowledged)">
+                    Confirm loaded
+                </button>
             </div>
         </div>
     }
@@ -38,3 +55,16 @@
 @* I4 placeholder: add the report-a-problem form here. *@
 
 <a class="btn btn-outline-secondary" asp-page="Manifest" asp-route-flightId="@Model.Flight.FlightId">&larr; Back to manifest</a>
+
+@section Scripts {
+    <script>
+        // Convenience only: the server refuses unacknowledged special bags regardless of this script.
+        const acknowledgement = document.getElementById("Acknowledged");
+        const confirmButton = document.getElementById("confirm-button");
+        if (acknowledgement && confirmButton) {
+            acknowledgement.addEventListener("change", () => {
+                confirmButton.disabled = !acknowledgement.checked;
+            });
+        }
+    </script>
+}

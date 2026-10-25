@@ -30,6 +30,7 @@ builder.Services.AddDbContext<AeroLinkDbContext>(options =>
 
 builder.Services.AddScoped<IFlightService, FlightService>();
 builder.Services.AddScoped<IBagVerificationService, BagVerificationService>();
+builder.Services.AddSingleton<ISpecialHandlingService, SpecialHandlingService>();
 
 var app = builder.Build();
 
