@@ -1,0 +1,40 @@
+@page
+@model AeroLink.Web.Pages.Baggage.LoadingModel
+@{ ViewData["Title"] = "Loading"; }
+
+<h2>Load bags &mdash; @Model.Flight!.FlightNumber</h2>
+<p>Loaded <strong>@Model.LoadedCount</strong> of <strong>@Model.ExpectedCount</strong></p>
+
+@if (Model.Result is not null)
+{
+    <div class="alert @(Model.Result.Success ? "alert-success" : "alert-danger")" role="alert">
+        @Model.Result.Message
+    </div>
+}
+
+<form method="post" class="mb-3">
+    <input type="hidden" name="flightId" value="@Model.Flight.FlightId" />
+    <div class="mb-3">
+        <label asp-for="Tag" class="form-label">Bag tag</label>
+        <input asp-for="Tag" class="form-control" autocomplete="off" />
+    </div>
+    <button class="btn btn-primary" asp-page-handler="Verify">Verify</button>
+
+    @if (Model.Result?.Success == true && Model.Result.Bag is not null)
+    {
+        <div class="card mt-3">
+            <div class="card-body">
+                <p class="mb-1"><strong>@Model.Result.Bag.Tag</strong></p>
+                <p class="mb-2">Handling type: @Model.Result.Bag.HandlingType</p>
+
+                @* I3 placeholder: add special-handling acknowledgement panel here. Bind its checkbox to Acknowledged. *@
+
+                <button class="btn btn-success" asp-page-handler="Confirm">Confirm loaded</button>
+            </div>
+        </div>
+    }
+</form>
+
+@* I4 placeholder: add the report-a-problem form here. *@
+
+<a class="btn btn-outline-secondary" asp-page="Manifest" asp-route-flightId="@Model.Flight.FlightId">&larr; Back to manifest</a>
