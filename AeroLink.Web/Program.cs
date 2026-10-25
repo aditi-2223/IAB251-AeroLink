@@ -30,6 +30,11 @@ builder.Services.AddDbContext<AeroLinkDbContext>(options =>
 
 builder.Services.AddScoped<IFlightService, FlightService>();
 builder.Services.AddScoped<IBagVerificationService, BagVerificationService>();
+builder.Services.AddHttpClient<IHrAuthService, HrAuthService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["HrApi:BaseUrl"] ?? "https://localhost:5001/");
+    client.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue<int>("HrApi:TimeoutSeconds"));
+});
 
 var app = builder.Build();
 
