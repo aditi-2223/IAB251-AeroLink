@@ -78,10 +78,16 @@ public interface IBagVerificationService
 public class BagVerificationService : IBagVerificationService
 {
     private readonly AeroLinkDbContext _db;
+    private readonly ISpecialHandlingService _specialHandling;
 
-    /// <summary>Creates the service with the database context supplied by dependency injection.</summary>
+    /// <summary>Creates the service with the dependencies supplied by dependency injection.</summary>
     /// <param name="db">The context used to read and update baggage loading data.</param>
-    public BagVerificationService(AeroLinkDbContext db) => _db = db;
+    /// <param name="specialHandling">Service that decides whether a special bag may be confirmed.</param>
+    public BagVerificationService(AeroLinkDbContext db, ISpecialHandlingService specialHandling)
+    {
+        _db = db;
+        _specialHandling = specialHandling;
+    }
 
     /// <inheritdoc />
     public async Task<VerificationResult> VerifyAsync(int flightId, string? tag) =>
@@ -152,8 +158,12 @@ public class BagVerificationService : IBagVerificationService
         if (hasOpenException)
             return Failure(VerificationOutcome.OpenException, "Unresolved exception, see supervisor", bag);
 
-        if (requireAcknowledgement && bag.IsSpecial && !acknowledged)
-            return Failure(VerificationOutcome.AcknowledgementRequired, "Acknowledge the special-handling instruction before loading", bag);
+        if (requireAcknowledgement)
+        {
+            var decision = _specialHandling.CanConfirmLoading(bag, acknowledged);
+            if (!decision.IsAllowed)
+                return Failure(VerificationOutcome.AcknowledgementRequired, decision.Message, bag);
+        }
 
         return new VerificationResult { Success = true, Outcome = VerificationOutcome.Valid, Message = "Tag verified", Bag = bag };
     }
