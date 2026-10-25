@@ -2,23 +2,42 @@
 @model AeroLink.Web.Pages.Account.LoginModel
 @{
     ViewData["Title"] = "Sign in";
+    var emailInvalid = ViewData.ModelState[nameof(Model.Email)]?.Errors.Count > 0;
+    var idInvalid = ViewData.ModelState[nameof(Model.EmployeeId)]?.Errors.Count > 0;
 }
 
 <div class="row justify-content-center mt-5">
-    <div class="col-md-5">
-        <h1 class="h3 mb-3">AeroLink sign in</h1>
-        <div class="alert alert-warning small">
-            Temporary sign-in (stub). Will be replaced by the HR system login.
-        </div>
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h3 mb-1">Sign in to AeroLink</h1>
+                <p class="text-muted mb-4">Use your work email and Employee ID.</p>
 
-        <form method="post">
-            <input type="hidden" asp-for="ReturnUrl" />
-            <div class="mb-3">
-                <label asp-for="Username" class="form-label">Name</label>
-                <input asp-for="Username" class="form-control" autofocus />
-                <span asp-validation-for="Username" class="text-danger"></span>
+                @if (Model.ErrorMessage is not null)
+                {
+                    <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+                }
+
+                <form method="post" novalidate>
+                    <input type="hidden" asp-for="ReturnUrl" />
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">Email address</label>
+                        <input asp-for="Email" type="email" class="form-control @(emailInvalid ? "is-invalid" : "")"
+                               autocomplete="username" placeholder="name@company.com" autofocus />
+                        <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="EmployeeId" class="form-label">Employee ID</label>
+                        <input asp-for="EmployeeId" type="text" inputmode="numeric" class="form-control @(idInvalid ? "is-invalid" : "")"
+                               autocomplete="off" placeholder="e.g. 100101" />
+                        <span asp-validation-for="EmployeeId" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Sign in</button>
+                </form>
             </div>
-            <button type="submit" class="btn btn-primary">Sign in</button>
-        </form>
+        </div>
     </div>
 </div>
