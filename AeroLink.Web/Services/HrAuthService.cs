@@ -4,111 +4,142 @@ using System.Net.Http.Json;
 using System.Net.Mail;
 using System.Text.Json;
 using AeroLink.Web.Models;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace AeroLink.Web.Services;
 
-/// <summary>Uses the HR employee endpoint to authenticate authorised AeroLink baggage employees.</summary>
-/// <remarks>Pre-condition: the injected client has an HR API base address. Post-condition: this service never persists data or creates cookies. HTTP, timeout, and JSON failures are safely mapped to <see cref="HrAuthOutcome.ServiceUnavailable"/>.</remarks>
-public sealed class HrAuthService : IHrAuthService
+/// <summary>
+/// Signs employees in by checking them against the HR system's REST API (T2). The HR API has no login endpoint, so this
+/// class fetches the employee by ID and compares the email and job title itself.
+/// </summary>
+/// <remarks>
+/// Invariant: the HR system is only ever read (HTTP GET). Decisions recorded for the team board: email matching ignores
+/// letter case; an Employee ID with leading zeros (for example <c>0100101</c>) is accepted and treated as 100101; unknown ID and
+/// wrong email share one message so the form never reveals which accounts exist. This is a simulated login, not production security.
+/// </remarks>
+public class HrAuthService : IHrAuthService
 {
-    private const string InvalidCredentialsMessage = "Invalid email or employee ID.";
-    private const string NotAuthorisedMessage = "You do not have permission to access the Baggage module.";
-    private const string ServiceUnavailableMessage = "Unable to verify your details right now. Please try again later.";
-    private readonly HttpClient _httpClient;
+    /// <summary>The longest email address that can be valid (RFC 5321).</summary>
+    private const int MaxEmailLength = 254;
 
-    /// <summary>Creates an HR authentication service using the configured typed HTTP client.</summary>
-    /// <param name="httpClient">Client configured with the HR API base URL and timeout.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="httpClient"/> is <c>null</c>.</exception>
-    /// <remarks>Pre-condition: the client base address targets the HR API. Post-condition: the client is retained for subsequent requests.</remarks>
-    public HrAuthService(HttpClient httpClient) => _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+    private const string EmailRequiredMessage = "Email is required.";
+    private const string EmailFormatMessage = "Enter a valid email address, for example name@company.com.";
+    private const string EmployeeIdRequiredMessage = "Employee ID is required.";
+    private const string EmployeeIdFormatMessage = "Employee ID must be a whole number from 1 to 2147483647.";
+
+    private readonly HttpClient _httpClient;
+    private readonly ILogger<HrAuthService> _logger;
+
+    /// <summary>Creates the service.</summary>
+    /// <param name="httpClient">A client whose <see cref="HttpClient.BaseAddress"/> is the HR system, for example <c>https://localhost:5001/</c>.</param>
+    /// <param name="logger">Optional logger for HR connection problems. Employee details are never logged.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="httpClient"/> is <c>null</c>.</exception>
+    public HrAuthService(HttpClient httpClient, ILogger<HrAuthService>? logger = null)
+    {
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        _logger = logger ?? NullLogger<HrAuthService>.Instance;
+    }
 
     /// <inheritdoc />
     public async Task<HrAuthResult> AuthenticateAsync(string? email, string? employeeId, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        var normalisedEmail = email?.Trim();
-        var normalisedEmployeeId = employeeId?.Trim();
-        var emailError = GetEmailError(normalisedEmail);
-        var employeeIdError = GetEmployeeIdError(normalisedEmployeeId, out var parsedEmployeeId);
+        var cleanEmail = email?.Trim() ?? string.Empty;
+        var cleanId = employeeId?.Trim() ?? string.Empty;
 
-        if (emailError is not null || employeeIdError is not null)
-        {
-            return new HrAuthResult
-            {
-                Outcome = HrAuthOutcome.ValidationFailed,
-                Message = "Please correct the highlighted fields.",
-                EmailError = emailError,
-                EmployeeIdError = employeeIdError
-            };
-        }
+        var emailError = ValidateEmail(cleanEmail);
+        var idError = ValidateEmployeeId(cleanId, out var id);
+        if (emailError is not null || idError is not null)
+            return HrAuthResult.ValidationFailed(emailError, idError);
+
+        var lookup = await FetchEmployeeAsync(id, cancellationToken);
+        if (lookup.Failure is not null)
+            return lookup.Failure;
+
+        var employee = lookup.Employee!;
+        if (!string.Equals(employee.Email?.Trim(), cleanEmail, StringComparison.OrdinalIgnoreCase))
+            return HrAuthResult.Failed(HrAuthOutcome.InvalidCredentials, HrAuthResult.InvalidCredentialsMessage);
+
+        if (!HrRoles.IsAllowed(employee.JobTitle))
+            return HrAuthResult.Failed(HrAuthOutcome.NotAuthorised, HrAuthResult.NotAuthorisedMessage);
+
+        return HrAuthResult.Succeeded(employee);
+    }
+
+    /// <summary>Checks an already-trimmed email.</summary>
+    /// <returns>An error message, or <c>null</c> if the email is acceptable.</returns>
+    private static string? ValidateEmail(string email)
+    {
+        if (email.Length == 0)
+            return EmailRequiredMessage;
+
+        // MailAddress alone also accepts "Name <a@b.com>" and "a@b", so require the parsed address to equal the input
+        // and the host to contain a dot.
+        var isValid = email.Length <= MaxEmailLength
+            && MailAddress.TryCreate(email, out var parsed)
+            && string.Equals(parsed.Address, email, StringComparison.OrdinalIgnoreCase)
+            && parsed.Host.Contains('.');
+
+        return isValid ? null : EmailFormatMessage;
+    }
+
+    /// <summary>Checks an already-trimmed Employee ID and converts it to a number.</summary>
+    /// <param name="employeeId">The trimmed text.</param>
+    /// <param name="id">The parsed ID when the text is valid, otherwise 0.</param>
+    /// <returns>An error message, or <c>null</c> if the ID is acceptable.</returns>
+    private static string? ValidateEmployeeId(string employeeId, out int id)
+    {
+        id = 0;
+        if (employeeId.Length == 0)
+            return EmployeeIdRequiredMessage;
+
+        // NumberStyles.None allows digits only: no sign, decimal point, spaces or thousands separators.
+        var isValid = int.TryParse(employeeId, NumberStyles.None, CultureInfo.InvariantCulture, out id) && id > 0;
+        return isValid ? null : EmployeeIdFormatMessage;
+    }
+
+    /// <summary>Calls <c>GET api/employees/{id}</c> and turns every possible problem into a result instead of an exception.</summary>
+    /// <param name="id">A valid, positive Employee ID.</param>
+    /// <param name="cancellationToken">The caller's cancellation token.</param>
+    /// <returns>The employee on success; otherwise the failure result to return to the caller.</returns>
+    /// <exception cref="OperationCanceledException">The caller cancelled the request.</exception>
+    private async Task<(HrEmployeeDto? Employee, HrAuthResult? Failure)> FetchEmployeeAsync(int id, CancellationToken cancellationToken)
+    {
+        var unavailable = HrAuthResult.Failed(HrAuthOutcome.ServiceUnavailable, HrAuthResult.ServiceUnavailableMessage);
 
         try
         {
-            using var response = await _httpClient.GetAsync($"api/employees/{parsedEmployeeId}", cancellationToken);
-            if (response.StatusCode == HttpStatusCode.NotFound)
-                return Failure(HrAuthOutcome.InvalidCredentials, InvalidCredentialsMessage);
+            using var response = await _httpClient.GetAsync($"api/employees/{id}", cancellationToken);
 
-            if (!response.IsSuccessStatusCode)
-                return Failure(HrAuthOutcome.ServiceUnavailable, ServiceUnavailableMessage);
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (null, HrAuthResult.Failed(HrAuthOutcome.InvalidCredentials, HrAuthResult.InvalidCredentialsMessage));
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                _logger.LogWarning("HR API returned unexpected status {StatusCode}.", (int)response.StatusCode);
+                return (null, unavailable);
+            }
 
             var employee = await response.Content.ReadFromJsonAsync<HrEmployeeDto>(cancellationToken: cancellationToken);
-            if (employee is null || !string.Equals(employee.Email?.Trim(), normalisedEmail, StringComparison.OrdinalIgnoreCase))
-                return Failure(HrAuthOutcome.InvalidCredentials, InvalidCredentialsMessage);
 
-            if (!IsAllowedRole(employee.JobTitle))
-                return Failure(HrAuthOutcome.NotAuthorised, NotAuthorisedMessage);
+            // Never trust a reply about a different employee than the one requested.
+            if (employee is null || employee.EmployeeId != id)
+            {
+                _logger.LogWarning("HR API returned an empty or mismatched employee record.");
+                return (null, unavailable);
+            }
 
-            return new HrAuthResult { Outcome = HrAuthOutcome.Success, Message = string.Empty, Employee = employee };
+            return (employee, null);
         }
-        catch (HttpRequestException)
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
-            return Failure(HrAuthOutcome.ServiceUnavailable, ServiceUnavailableMessage);
+            _logger.LogWarning("The HR API did not respond in time.");
+            return (null, unavailable);
         }
-        catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+        catch (Exception ex) when (ex is HttpRequestException or JsonException or NotSupportedException)
         {
-            return Failure(HrAuthOutcome.ServiceUnavailable, ServiceUnavailableMessage);
-        }
-        catch (JsonException)
-        {
-            return Failure(HrAuthOutcome.ServiceUnavailable, ServiceUnavailableMessage);
+            _logger.LogWarning(ex, "The HR API could not be used.");
+            return (null, unavailable);
         }
     }
-
-    /// <summary>Validates email syntax using MailAddress because it is a concise syntax check, not mailbox verification.</summary>
-    private static string? GetEmailError(string? email)
-    {
-        if (string.IsNullOrWhiteSpace(email))
-            return "Email is required";
-
-        try
-        {
-            var parsed = new MailAddress(email);
-            return string.Equals(parsed.Address, email, StringComparison.OrdinalIgnoreCase) ? null : "Enter a valid email address.";
-        }
-        catch (FormatException)
-        {
-            return "Enter a valid email address.";
-        }
-    }
-
-    /// <summary>Validates and parses the positive whole-number employee ID.</summary>
-    private static string? GetEmployeeIdError(string? employeeId, out int parsedEmployeeId)
-    {
-        parsedEmployeeId = 0;
-        if (string.IsNullOrWhiteSpace(employeeId))
-            return "Employee ID is required";
-
-        if (!int.TryParse(employeeId, NumberStyles.None, CultureInfo.InvariantCulture, out parsedEmployeeId) || parsedEmployeeId <= 0)
-            return "Employee ID must be a positive whole number.";
-
-        return null;
-    }
-
-    /// <summary>Determines whether an HR job title grants baggage-module access.</summary>
-    private static bool IsAllowedRole(string? role) =>
-        string.Equals(role, BaggageRoles.BaggageHandler, StringComparison.OrdinalIgnoreCase) ||
-        string.Equals(role, BaggageRoles.BaggageSupervisor, StringComparison.OrdinalIgnoreCase);
-
-    /// <summary>Creates a safe non-success authentication result.</summary>
-    private static HrAuthResult Failure(HrAuthOutcome outcome, string message) => new() { Outcome = outcome, Message = message };
 }
