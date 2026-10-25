@@ -1,0 +1,11 @@
+@* Display-only panel for a bag's special-handling category and instruction (I3).
+   Renders nothing for a standard bag. Shared by the Manifest and Loading pages. *@
+@model SpecialHandlingInfo
+
+@if (Model.IsSpecial)
+{
+    <div class="special-handling">
+        <span class="pill pill-amber">@Model.Category</span>
+        <div class="small text-muted mt-1">@Model.Instruction</div>
+    </div>
+}

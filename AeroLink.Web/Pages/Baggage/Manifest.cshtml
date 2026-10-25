@@ -20,16 +20,14 @@
     <tbody>
     @foreach (var b in Model.Flight.Bags)
     {
+        var handling = Model.GetHandlingInfo(b);
         <tr>
             <td>@b.Tag</td>
             <td>
-                @if (b.IsSpecial)
+                <partial name="_SpecialHandlingPanel" model="handling" />
+                @if (!handling.IsSpecial)
                 {
-                    <span class="badge bg-warning text-dark">@b.HandlingType</span>
-                }
-                else
-                {
-                    @b.HandlingType
+                    @handling.Category
                 }
             </td>
             <td>@(b.Outcome == BagOutcome.Pending ? "Outstanding" : b.Outcome.ToString())</td>

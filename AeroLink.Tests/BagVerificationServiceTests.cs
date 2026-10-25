@@ -10,7 +10,7 @@ public class BagVerificationServiceTests
     [Fact]
     public async Task AC5_ValidTagConfirmsAndIncreasesCountFromZeroToOne()
     {
-        await using var db = CreateContext(); var service = new BagVerificationService(db);
+        await using var db = CreateContext(); var service = new BagVerificationService(db, new SpecialHandlingService());
         Assert.Equal(0, await service.GetLoadedCountAsync(101));
         Assert.True((await service.ConfirmLoadedAsync(101, "DEMO-101-001")).Success);
         Assert.Equal(1, await service.GetLoadedCountAsync(101));
@@ -20,16 +20,18 @@ public class BagVerificationServiceTests
     public async Task AC4_LowercasePaddedTagIsAccepted()
     {
         await using var db = CreateContext();
-        var result = await new BagVerificationService(db).VerifyAsync(101, "  demo-101-001  ");
+        var result = await new BagVerificationService(db, new SpecialHandlingService()).VerifyAsync(101, "  demo-101-001  ");
         Assert.True(result.Success); Assert.Equal("DEMO-101-001", result.Bag!.Tag);
     }
 
     [Theory]
-    [InlineData(null)] [InlineData("")] [InlineData("   ")]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
     public async Task AC3_EmptyNullAndWhitespaceTagsAreRejected(string? tag)
     {
         await using var db = CreateContext();
-        var result = await new BagVerificationService(db).VerifyAsync(101, tag);
+        var result = await new BagVerificationService(db, new SpecialHandlingService()).VerifyAsync(101, tag);
         Assert.False(result.Success); Assert.Equal(VerificationOutcome.EmptyTag, result.Outcome);
         Assert.Equal("Please enter a bag tag", result.Message);
     }
@@ -37,7 +39,7 @@ public class BagVerificationServiceTests
     [Fact]
     public async Task AC8_UnknownTagIsRejected()
     {
-        await using var db = CreateContext(); var service = new BagVerificationService(db);
+        await using var db = CreateContext(); var service = new BagVerificationService(db, new SpecialHandlingService());
         var result = await service.ConfirmLoadedAsync(101, "NOT-A-DATASET-TAG");
         Assert.False(result.Success); Assert.Equal(VerificationOutcome.NotFound, result.Outcome);
         Assert.Equal(0, await service.GetLoadedCountAsync(101));
@@ -46,7 +48,7 @@ public class BagVerificationServiceTests
     [Fact]
     public async Task AC9_BagFromAnotherFlightIsRejectedWithoutChangingOutcome()
     {
-        await using var db = CreateContext(); var service = new BagVerificationService(db);
+        await using var db = CreateContext(); var service = new BagVerificationService(db, new SpecialHandlingService());
         var result = await service.ConfirmLoadedAsync(101, "DEMO-102-001");
         Assert.False(result.Success); Assert.Equal(VerificationOutcome.WrongFlight, result.Outcome);
         Assert.Contains("DEMO102", result.Message); Assert.Equal(BagOutcome.Pending, (await db.Bags.FindAsync(3))!.Outcome);
@@ -55,7 +57,7 @@ public class BagVerificationServiceTests
     [Fact]
     public async Task AC10_DuplicateConfirmIsRejectedAndCountStaysOne()
     {
-        await using var db = CreateContext(); var service = new BagVerificationService(db);
+        await using var db = CreateContext(); var service = new BagVerificationService(db, new SpecialHandlingService());
         Assert.True((await service.ConfirmLoadedAsync(101, "DEMO-101-001")).Success);
         var duplicate = await service.ConfirmLoadedAsync(101, "DEMO-101-001");
         Assert.False(duplicate.Success); Assert.Equal(VerificationOutcome.AlreadyLoaded, duplicate.Outcome);
@@ -65,7 +67,7 @@ public class BagVerificationServiceTests
     [Fact]
     public async Task AC11_OpenExceptionIsRejectedAndResolvedExceptionCanLoad()
     {
-        await using var db = CreateContext(); var service = new BagVerificationService(db);
+        await using var db = CreateContext(); var service = new BagVerificationService(db, new SpecialHandlingService());
         var rejected = await service.ConfirmLoadedAsync(101, "DEMO-101-002");
         Assert.Equal(VerificationOutcome.OpenException, rejected.Outcome);
         (await db.Exceptions.FindAsync(1))!.Status = ExceptionStatus.Resolved; await db.SaveChangesAsync();
@@ -75,7 +77,7 @@ public class BagVerificationServiceTests
     [Fact]
     public async Task AC16_SpecialBagNeedsAcknowledgementThenLoads()
     {
-        await using var db = CreateContext(); var service = new BagVerificationService(db);
+        await using var db = CreateContext(); var service = new BagVerificationService(db, new SpecialHandlingService());
         var rejected = await service.ConfirmLoadedAsync(101, "DEMO-101-003");
         var accepted = await service.ConfirmLoadedAsync(101, "DEMO-101-003", acknowledged: true);
         Assert.Equal(VerificationOutcome.AcknowledgementRequired, rejected.Outcome); Assert.True(accepted.Success);
@@ -84,7 +86,7 @@ public class BagVerificationServiceTests
     [Fact]
     public async Task AC12_RejectedConfirmNeverChangesCount()
     {
-        await using var db = CreateContext(); var service = new BagVerificationService(db);
+        await using var db = CreateContext(); var service = new BagVerificationService(db, new SpecialHandlingService());
         await service.ConfirmLoadedAsync(101, "DEMO-102-001");
         Assert.Equal(0, await service.GetLoadedCountAsync(101));
     }
@@ -92,7 +94,7 @@ public class BagVerificationServiceTests
     [Fact]
     public async Task AC7_FirstConfirmMovesFlightToInProgress()
     {
-        await using var db = CreateContext(); var service = new BagVerificationService(db);
+        await using var db = CreateContext(); var service = new BagVerificationService(db, new SpecialHandlingService());
         await service.ConfirmLoadedAsync(101, "DEMO-101-001");
         db.ChangeTracker.Clear();
         Assert.Equal(LoadingStatus.InProgress, (await db.Flights.FindAsync(101))!.LoadingStatus);
@@ -101,7 +103,7 @@ public class BagVerificationServiceTests
     [Fact]
     public async Task AC15_UnknownFlightIdIsHandledSafely()
     {
-        await using var db = CreateContext(); var service = new BagVerificationService(db);
+        await using var db = CreateContext(); var service = new BagVerificationService(db, new SpecialHandlingService());
         var result = await service.ConfirmLoadedAsync(999, "DEMO-101-001");
         Assert.False(result.Success); Assert.Equal(VerificationOutcome.WrongFlight, result.Outcome);
         Assert.Equal(0, await service.GetLoadedCountAsync(999));

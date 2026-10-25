@@ -10,14 +10,20 @@ public class LoadingModel : PageModel
 {
     private readonly IFlightService _flights;
     private readonly IBagVerificationService _bagVerification;
+    private readonly ISpecialHandlingService _specialHandling;
 
-    /// <summary>Creates the page with its flight and bag verification services.</summary>
+    /// <summary>Creates the page with its flight, bag verification and special-handling services.</summary>
     /// <param name="flights">Service used to read the selected flight.</param>
     /// <param name="bagVerification">Service that validates and confirms bag tags.</param>
-    public LoadingModel(IFlightService flights, IBagVerificationService bagVerification)
+    /// <param name="specialHandling">Service that identifies special bags and supplies their instructions.</param>
+    public LoadingModel(
+        IFlightService flights,
+        IBagVerificationService bagVerification,
+        ISpecialHandlingService specialHandling)
     {
         _flights = flights;
         _bagVerification = bagVerification;
+        _specialHandling = specialHandling;
     }
 
     /// <summary>Gets the selected departure flight.</summary>
@@ -27,7 +33,7 @@ public class LoadingModel : PageModel
     [BindProperty]
     public string? Tag { get; set; }
 
-    /// <summary>Gets or sets whether special handling was acknowledged; I3 will provide its UI.</summary>
+    /// <summary>Gets or sets whether the handler ticked the special-handling acknowledgement checkbox.</summary>
     [BindProperty]
     public bool Acknowledged { get; set; }
 
@@ -40,6 +46,19 @@ public class LoadingModel : PageModel
     /// <summary>Gets the number of bags expected on the selected flight.</summary>
     public int ExpectedCount { get; private set; }
 
+    /// <summary>
+    /// Gets the bag the handler may confirm next, or <c>null</c> when there is none.
+    /// </summary>
+    /// <remarks>
+    /// A bag is awaiting confirmation when it passed verification, or was refused only because its
+    /// special-handling instruction was not acknowledged, and it has not yet been loaded.
+    /// </remarks>
+    public Bag? BagAwaitingConfirmation =>
+        Result is { Bag: { } bag, Outcome: VerificationOutcome.Valid or VerificationOutcome.AcknowledgementRequired }
+        && bag.Outcome != BagOutcome.Loaded
+            ? bag
+            : null;
+
     /// <summary>Loads the selected flight and its current loading total.</summary>
     /// <param name="flightId">Flight identifier supplied in the query string.</param>
     /// <returns>The page when the flight exists, otherwise a 404 result.</returns>
@@ -48,9 +67,12 @@ public class LoadingModel : PageModel
     /// <summary>Verifies a tag without changing its loading outcome.</summary>
     /// <param name="flightId">Selected flight identifier.</param>
     /// <returns>The refreshed page or a 404 result for an unknown flight.</returns>
+    /// <remarks>Post-condition: the acknowledgement is cleared, so each bag must be acknowledged on its own.</remarks>
     public async Task<IActionResult> OnPostVerifyAsync(int flightId)
     {
         if (!await LoadPageAsync(flightId)) return NotFound();
+        Acknowledged = false;
+        ModelState.Remove(nameof(Acknowledged));
         Result = await _bagVerification.VerifyAsync(flightId, Tag);
         return Page();
     }
@@ -65,6 +87,11 @@ public class LoadingModel : PageModel
         LoadedCount = await _bagVerification.GetLoadedCountAsync(flightId);
         return Page();
     }
+
+    /// <summary>Gets the handling category and instruction to display for a bag.</summary>
+    /// <param name="bag">The verified bag.</param>
+    /// <returns>The bag's handling information, as decided by the special-handling service.</returns>
+    public SpecialHandlingInfo GetHandlingInfo(Bag bag) => _specialHandling.GetInfo(bag);
 
     private async Task<bool> LoadPageAsync(int flightId)
     {
