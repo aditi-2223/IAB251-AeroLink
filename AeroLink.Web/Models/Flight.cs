@@ -12,12 +12,15 @@ public class Flight
     /// <summary>Flight number, e.g. DEMO101.</summary>
     public string FlightNumber { get; set; } = "";
 
+    /// <summary>Airport the flight departs from.</summary>
     public string DepartureAirport { get; set; } = "";
+    /// <summary>Airport the flight arrives at.</summary>
     public string ArrivalAirport { get; set; } = "";
 
     /// <summary>Scheduled departure time in UTC.</summary>
     public DateTime ScheduledDepartureUtc { get; set; }
 
+    /// <summary>Identifier of the aircraft assigned to the flight.</summary>
     public string AircraftId { get; set; } = "";
 
     /// <summary>Current state of the loading operation.</summary>

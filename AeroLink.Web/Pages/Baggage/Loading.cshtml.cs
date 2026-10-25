@@ -143,6 +143,10 @@ public class LoadingModel : PageModel
     /// <returns>The bag's handling information, as decided by the special-handling service.</returns>
     public SpecialHandlingInfo GetHandlingInfo(Bag bag) => _specialHandling.GetInfo(bag);
 
+    /// <summary>Loads the selected flight and the values shown alongside it.</summary>
+    /// <param name="flightId">The departure flight identifier.</param>
+    /// <returns><c>true</c> when the flight exists; otherwise <c>false</c>.</returns>
+    /// <remarks>Post-condition: when successful, the flight, counts and open exceptions are refreshed.</remarks>
     private async Task<bool> LoadPageAsync(int flightId)
     {
         Flight = await _flights.GetManifestAsync(flightId);

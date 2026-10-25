@@ -130,6 +130,13 @@ public class BagVerificationService : IBagVerificationService
     public Task<int> GetExpectedBagCountAsync(int flightId) =>
         _db.Bags.AsNoTracking().CountAsync(b => b.FlightId == flightId);
 
+    /// <summary>Checks whether a tag belongs to an eligible bag on the selected flight.</summary>
+    /// <param name="flightId">The selected departure flight identifier.</param>
+    /// <param name="tag">The tag entered by the handler; surrounding whitespace is ignored.</param>
+    /// <param name="acknowledged">Whether the handler acknowledged the special-handling instruction.</param>
+    /// <param name="requireAcknowledgement">Whether special bags must have their instruction acknowledged.</param>
+    /// <returns>A successful result with the matching bag, or a failure result explaining why the tag cannot proceed.</returns>
+    /// <remarks>Post-condition: no database rows change.</remarks>
     private async Task<VerificationResult> CheckAsync(int flightId, string? tag, bool acknowledged, bool requireAcknowledgement)
     {
         var normalisedTag = tag?.Trim();
@@ -168,6 +175,11 @@ public class BagVerificationService : IBagVerificationService
         return new VerificationResult { Success = true, Outcome = VerificationOutcome.Valid, Message = "Tag verified", Bag = bag };
     }
 
+    /// <summary>Creates a failed tag-verification result.</summary>
+    /// <param name="outcome">The reason verification failed.</param>
+    /// <param name="message">The message to show the handler.</param>
+    /// <param name="bag">The matched bag, if one was found before verification failed.</param>
+    /// <returns>A result whose <see cref="VerificationResult.Success"/> value is <c>false</c>.</returns>
     private static VerificationResult Failure(VerificationOutcome outcome, string message, Bag? bag = null) =>
         new() { Success = false, Outcome = outcome, Message = message, Bag = bag };
 

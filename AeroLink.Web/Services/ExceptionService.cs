@@ -92,6 +92,10 @@ public class ExceptionService : IExceptionService
     public Task<bool> HasOpenExceptionsAsync(int flightId) =>
         _db.Exceptions.AsNoTracking().AnyAsync(e => e.FlightId == flightId && e.Status == ExceptionStatus.Open);
 
+    /// <summary>Creates a result for a report that was not recorded.</summary>
+    /// <param name="outcome">The reason the report was rejected.</param>
+    /// <param name="message">The message to show the handler.</param>
+    /// <returns>A failure result with no recorded exception.</returns>
     private static ExceptionReportResult Failure(ExceptionReportOutcome outcome, string message) =>
         new(outcome, message);
 }
