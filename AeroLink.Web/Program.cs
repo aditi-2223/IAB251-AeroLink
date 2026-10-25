@@ -1,6 +1,7 @@
 using AeroLink.Web.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using AeroLink.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,8 +15,7 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AllowAnonymousToPage("/Account/Login");
 });
 
-// T1: cookie authentication. Implements the real HR login (T2)
-// only needs to call HttpContext.SignInAsync with this default scheme.
+// T1: cookie authentication. The HR login (T2) calls HttpContext.SignInAsync with this default scheme.
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -28,13 +28,18 @@ builder.Services
 builder.Services.AddDbContext<AeroLinkDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("AeroLink")));
 
+// T2: HR system connection. BaseUrl and TimeoutSeconds come from the "HrApi" section of appsettings.json.
+builder.Services.Configure<HrApiOptions>(builder.Configuration.GetSection(HrApiOptions.SectionName));
+builder.Services.AddHttpClient<IHrAuthService, HrAuthService>((serviceProvider, client) =>
+{
+    var options = serviceProvider.GetRequiredService<IOptions<HrApiOptions>>().Value;
+    client.BaseAddress = options.GetBaseUri();
+    client.Timeout = options.GetTimeout();
+});
+
 builder.Services.AddScoped<IFlightService, FlightService>();
 builder.Services.AddScoped<IBagVerificationService, BagVerificationService>();
-builder.Services.AddHttpClient<IHrAuthService, HrAuthService>(client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["HrApi:BaseUrl"] ?? "https://localhost:5001/");
-    client.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue<int>("HrApi:TimeoutSeconds"));
-});
+builder.Services.AddSingleton<ISpecialHandlingService, SpecialHandlingService>();
 
 var app = builder.Build();
 
