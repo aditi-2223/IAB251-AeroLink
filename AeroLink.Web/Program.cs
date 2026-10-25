@@ -39,6 +39,7 @@ builder.Services.AddHttpClient<IHrAuthService, HrAuthService>((serviceProvider, 
 
 builder.Services.AddScoped<IFlightService, FlightService>();
 builder.Services.AddScoped<IBagVerificationService, BagVerificationService>();
+builder.Services.AddScoped<IExceptionService, ExceptionService>();
 builder.Services.AddSingleton<ISpecialHandlingService, SpecialHandlingService>();
 
 var app = builder.Build();

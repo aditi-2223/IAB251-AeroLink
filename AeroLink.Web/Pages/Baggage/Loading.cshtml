@@ -1,6 +1,8 @@
 @page
 @model AeroLink.Web.Pages.Baggage.LoadingModel
-@{ ViewData["Title"] = "Loading"; }
+@{
+    ViewData["Title"] = "Loading";
+}
 
 <h2>Load bags &mdash; @Model.Flight!.FlightNumber</h2>
 <p>Loaded <strong>@Model.LoadedCount</strong> of <strong>@Model.ExpectedCount</strong></p>
@@ -52,7 +54,74 @@
     }
 </form>
 
-@* I4 placeholder: add the report-a-problem form here. *@
+@* I4: report a problem with a bag. Separate form so it never interferes with Verify and Confirm. *@
+<div class="card mb-3" id="report-problem">
+    <div class="card-body">
+        <h3 class="h5">Report a problem</h3>
+        <p class="text-muted small mb-3">Use this when a bag is missing or damaged. A supervisor will investigate.</p>
+
+        @if (Model.ReportResult is not null)
+        {
+            <div class="alert @(Model.ReportResult.Success ? "alert-success" : "alert-danger")" role="alert">
+                @Model.ReportResult.Message
+            </div>
+        }
+
+        <form method="post" asp-page-handler="Report">
+            <input type="hidden" name="flightId" value="@Model.Flight.FlightId" />
+            <div class="mb-3">
+                <label asp-for="ReportTag" class="form-label">Bag tag</label>
+                <input asp-for="ReportTag" class="form-control" autocomplete="off" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="ReportCategory" class="form-label">Type of problem</label>
+                <select asp-for="ReportCategory" class="form-select">
+                    <option value="">Choose&hellip;</option>
+                    @foreach (var category in ExceptionCategories.All)
+                    {
+                        <option value="@category" selected="@(string.Equals(Model.ReportCategory, category, StringComparison.OrdinalIgnoreCase))">@ExceptionCategories.DisplayName(category)</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ReportComment" class="form-label">Comment</label>
+                <textarea asp-for="ReportComment" class="form-control" rows="3" maxlength="@Model.MaxCommentLength"></textarea>
+                <div class="form-text">Describe what you found. Up to @Model.MaxCommentLength characters.</div>
+            </div>
+            <button type="submit" class="btn btn-warning">Report problem</button>
+        </form>
+    </div>
+</div>
+
+<h3 class="h5">Open exceptions for @Model.Flight.FlightNumber</h3>
+@if (Model.OpenExceptions.Count == 0)
+{
+    <p class="text-muted">No open exceptions.</p>
+}
+else
+{
+    <div class="alert alert-warning" role="alert">
+        Loading cannot be completed while exceptions are open. A supervisor must investigate them first.
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <thead>
+                <tr><th>Bag tag</th><th>Problem</th><th>Comment</th><th>Reported (UTC)</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OpenExceptions)
+                {
+                    <tr>
+                        <td>@item.Bag?.Tag</td>
+                        <td>@ExceptionCategories.DisplayName(item.Category)</td>
+                        <td>@item.Description</td>
+                        <td>@(item.ReportedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "Not recorded")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
 
 <a class="btn btn-outline-secondary" asp-page="Manifest" asp-route-flightId="@Model.Flight.FlightId">&larr; Back to manifest</a>
 
