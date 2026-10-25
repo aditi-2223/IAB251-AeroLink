@@ -1,10 +1,10 @@
 namespace AeroLink.Web.Models;
 
-/// <summary>Lifecycle of a flight's baggage loading operation.</summary>
+/// <summary>Shows the current stage of baggage loading for a flight.</summary>
 public enum LoadingStatus { NotStarted, InProgress, Completed }
 
-/// <summary>Recorded outcome for a single bag on the manifest.</summary>
+/// <summary>Records the loading result for one bag in a manifest.</summary>
 public enum BagOutcome { Pending, Loaded, ApprovedNotToLoad }
 
-/// <summary>State of a reported baggage exception.</summary>
+/// <summary>Shows whether a reported baggage exception still needs action.</summary>
 public enum ExceptionStatus { Open, Resolved }

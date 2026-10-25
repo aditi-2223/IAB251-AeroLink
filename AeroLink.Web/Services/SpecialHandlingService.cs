@@ -32,9 +32,16 @@ public class SpecialHandlingService : ISpecialHandlingService
         return LoadingDecision.Allow(LoadingAllowedMessage);
     }
 
+    /// <summary>Gets the trimmed handling category to display for a special bag.</summary>
+    /// <param name="bag">The bag whose handling category is being read.</param>
+    /// <returns>The bag's trimmed category, or <c>Special</c> when the category is blank.</returns>
     private static string ResolveCategory(Bag bag) =>
         string.IsNullOrWhiteSpace(bag.HandlingType) ? UnspecifiedCategory : bag.HandlingType.Trim();
 
+    /// <summary>Gets the trimmed handling instruction, using a supplied default when it is blank.</summary>
+    /// <param name="bag">The bag whose instruction is being read.</param>
+    /// <param name="fallback">The instruction to use when the bag has no instruction.</param>
+    /// <returns>The bag's trimmed instruction, or <paramref name="fallback"/>.</returns>
     private static string ResolveInstruction(Bag bag, string fallback) =>
         string.IsNullOrWhiteSpace(bag.HandlingInstruction) ? fallback : bag.HandlingInstruction.Trim();
 }
