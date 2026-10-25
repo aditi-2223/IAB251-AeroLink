@@ -24,7 +24,7 @@ Sign in → Main screen → Select flight → View manifest → Verify and load 
 |---|---|---|---|
 | T1 | Main screen, navigation, sign-in state | Aditi | ✅ |
 | I1 | View expected bags for a flight | Aditi | ✅ |
-| T3 | Log out | Aditi | 🔄 |
+| T3 | Log out | Aditi | ✅ |
 | I3 | Special-handling acknowledgement | Aditi | 🔲 |
 | T2 | Sign in using the HR API | Hetvik | 🔲 |
 | I2 | Verify and confirm a bag | Hetvik | 🔄 |
@@ -55,7 +55,7 @@ dotnet build
 dotnet run --project AeroLink.Web
 ```
 
-The console prints the `https://localhost:xxxx` address to open. The database (`AeroLink.db`) is created and seeded from the manifest on the first run.
+The console prints the `https://localhost:5183` address to open. The database (`AeroLink.db`) is created and seeded from the manifest on the first run.
 
 If you change the data model, delete `AeroLink.db` and restart so it is rebuilt.
 
@@ -65,7 +65,7 @@ If you change the data model, delete `AeroLink.db` and restart so it is rebuilt.
 dotnet run --project HRSystem
 ```
 
-It listens on `https://localhost:5183`. Then start AeroLink as above.
+It listens on `https://localhost:5001`. Then start AeroLink as above.
 
 **Tip:** the login is a browser cookie that lasts for the browser session. To see the sign-in page again, use the Log out button or a private window.
 
